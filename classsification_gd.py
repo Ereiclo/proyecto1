@@ -5,14 +5,14 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-class Classification:
+class ClassificationGD:
 
     def h(self,x):
         return x @ self.w + self.b
     
 
     def svm_predict(self,x):
-        update_values = np.vectorize(lambda x: -1 if x <= -1 else 1)
+        update_values = np.vectorize(lambda x: -1 if x < 0 else 1,otypes=[float])
         prediction = self.h(x)
 
         return update_values(prediction)
@@ -50,22 +50,29 @@ class Classification:
         return dw,db
 
 
-    def logistic_predict(self,x):
+
+    def logistic_h(self,x):
         return (1 + np.exp(-self.h(x)))**-1
+    
+    def logistic_predict(self,x):
+        update_values = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
+        prediction = self.logistic_h(x)
+
+        return update_values(prediction)
     
 
     def logistic_loss(self,x,y):
 
         eps = 0.0000000000001
 
-        class_0_loss = np.dot(1 - y,np.log2(1 - self.logistic_predict(x) + eps))
-        class_1_loss = np.dot(y,np.log2(self.logistic_predict(x) + eps))
+        class_0_loss = np.dot(1 - y,np.log2(1 - self.logistic_h(x) + eps))
+        class_1_loss = np.dot(y,np.log2(self.logistic_h(x) + eps))
     
         return (class_0_loss + class_1_loss)/(-len(y))
     
     def logistic_loss_derivates(self,x,y):
-        dw = (1/len(y))*( (y - self.logistic_predict(x)) @ -x )
-        db = np.sum(y - self.logistic_predict(x))*(-1/len(y))
+        dw = (1/len(y))*( (y - self.logistic_h(x)) @ -x )
+        db = np.sum(y - self.logistic_h(x))*(-1/len(y))
 
         return  dw,db
 
@@ -178,14 +185,16 @@ X1 = np.array(data['C2'])
 X = np.transpose(np.array([X0,X1]))
 Y = np.array(data['Clase'])
 model = 'svm'
+alpha = 0.15
 
 if model == 'svm':
     change_labels = np.vectorize(lambda x: -1 if x == 0 else 1 )
     Y = change_labels(Y)
+    alpha = 0.0001
 
 X_train,X_val,X_testing,Y_train,Y_val,Y_testing = splitData(X,Y)
 
-logistic_regresion = Classification(0.0001,1000,c=10,model=model)
+logistic_regresion = ClassificationGD(alpha,1000,c=10,model=model)
 
 
 
