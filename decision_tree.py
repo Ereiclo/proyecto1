@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 
 class Nodo:
@@ -49,8 +48,12 @@ class Nodo:
             max_entropy_split = -np.Infinity
             selected_split = -1
 
+            # print(X)
+            # print(X[:,j][:10])
+            # print({elem for elem in X[:,j][:10]})
             column_values = {elem for elem in X[:,j]}
 
+            # print(f'Probando con dim {j}:')
 
 
             for elem in column_values:
@@ -61,14 +64,21 @@ class Nodo:
                 div_left = len(Y_left)/len(Y) # i - 0 + 1
                 div_right = len(Y_right)/len(Y)  # n - 1 - i
 
-                actual_disorder = Nodo.Entropy(Y) - div_left * \
-                    Nodo.Entropy(Y_left) + div_right*Nodo.Entropy(Y_right)
+                # print(f'Division con {elem} da {len(Y_left)} a la izquierda y {len(Y_right)} a la derecha (desorden actual = {max_entropy_split})')
+                # print(Y_left)
+                # print(Y_right)
+                # print(f'Entropia izquierda: {  Nodo.Entropy(Y_left)} {np.sum(Y_left)}')
+                # print(f'Entropia derecha: {  Nodo.Entropy(Y_right)} {np.sum(Y_right)}')
+
+                actual_disorder = Nodo.Entropy(Y) - (div_left * Nodo.Entropy(Y_left) +  div_right*Nodo.Entropy(Y_right))
+                # print(f'Resultado para la entropia ({elem}): {actual_disorder}')
 
                 if actual_disorder > max_entropy_split:
                     max_entropy_split = actual_disorder
                     selected_split = elem 
                     # selected_split = -1 if div_left == 1 or div_right == 1 else elem 
 
+            # print(f'Elegido {selected_split} con {max_entropy_split} de ganacia')
             if max_entropy_split > max_global:
                 selected_dim = j
                 split_for_dim = selected_split
@@ -88,7 +98,7 @@ class Nodo:
  
 
 
-    def Entropy(self, Y):
+    def Entropy( Y):
         # write your code here
         if len(Y) == 0:
             return 0
@@ -118,8 +128,12 @@ class DT:
 
     def buildDTForCurrentNode(self, actual_node,X,Y):
         # write your code here
-        if not Nodo.dataIsTerminal(data):
-            selected_dim, split_for_dim = actual_node.BestSplit(X,Y)
+        # print(Y)
+        # print(X.shape)
+
+        if not Nodo.dataIsTerminal(Y):
+            # print(f'Best split para {len(Y)} elementos')
+            selected_dim, split_for_dim = Nodo.BestSplit(X,Y)
 
             left,right = Nodo.splitByValue(X[:,selected_dim],split_for_dim)
 
@@ -137,7 +151,8 @@ class DT:
                 self.buildDTForCurrentNode(
                     actual_node.right,X[right],Y[right])
 
-        actual_node.node_class = Y[0] 
+        else:
+            actual_node.node_class = Y[0] 
     
     def predict(self,X):
         results = []
@@ -145,33 +160,32 @@ class DT:
         for point in X:
             results.append(self.pointPredict(self.m_Root,point))
     
-        return results
+        return np.array(results)
     
     def pointPredict(self,actual_node,point):
-        if actual_node.node_class:
+        # print(actual_node.representative_data,actual_node.index,actual_node.node_class)
+        if not (actual_node.node_class is None):
             return actual_node.node_class
         else:
             status = point[actual_node.index] <= actual_node.representative_data
             return self.pointPredict(actual_node.left,point) if status else self.pointPredict(actual_node.right,point)
 
 
+
+
+
+
+
 # dt = DT(iris_np)
 
 
-data = pd.read_csv('./tests_datasets/testing.csv')
 
-data_train = data.sample(frac=0.7, random_state=43)
-data_test = data[~data.index.isin(data_train.index)]
-# print(data_train.head())
-# print(data_train.shape)
-# print(data_test.shape)
-# print(data.shape)
-# data_test = data[data.index.isin(data_train)]
-X_train = data_train.drop(columns='Clase')
-Y_train = data_train['Clase']
 
-X_test = data_test.drop(columns='Clase').to_numpy()
-Y_test = data_test['Clase'].to_numpy()
+
+
+# dt = DT(X_train,Y_train)
+
+
 
 
 # data = data[data[:,j].argsort()]
