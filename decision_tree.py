@@ -86,56 +86,56 @@ class Nodo:
 
         return selected_dim, split_for_dim
     
-    # def BestSplit2(X, Y):
-    #     # write your code here
-    #     _, dim = X.shape
-    #     max_global = -np.Infinity
-    #     selected_dim = -1
-    #     split_for_dim = -1
+    def BestSplit2(X, Y):
+        # write your code here
+        _, dim = X.shape
+        max_global = -np.Infinity
+        selected_dim = -1
+        split_for_dim = -1
 
-    #     for j in range(dim):
+        for j in range(dim):
 
-    #         max_entropy_split = -np.Infinity
-    #         selected_split = -1
+            max_entropy_split = -np.Infinity
+            selected_split = -1
 
-    #         # print(X)
-    #         # print(X[:,j][:10])
-    #         # print({elem for elem in X[:,j][:10]})
-    #         column_values = {elem for elem in X[:,j]}
+            # print(X)
+            # print(X[:,j][:10])
+            # print({elem for elem in X[:,j][:10]})
+            column_values = {elem for elem in X[:,j]}
 
-    #         print(f'Probando con dim {j}:')
+            print(f'Probando con dim {j}:')
 
 
-    #         for elem in column_values:
-    #             left,right = Nodo.splitByValue(X[:,j],elem)
-    #             Y_left = Y[left]
-    #             Y_right = Y[right]
+            for elem in column_values:
+                left,right = Nodo.splitByValue(X[:,j],elem)
+                Y_left = Y[left]
+                Y_right = Y[right]
 
-    #             div_left = len(Y_left)/len(Y) # i - 0 + 1
-    #             div_right = len(Y_right)/len(Y)  # n - 1 - i
+                div_left = len(Y_left)/len(Y) # i - 0 + 1
+                div_right = len(Y_right)/len(Y)  # n - 1 - i
 
-    #             print(f'Division con {elem} da {len(Y_left)} a la izquierda y {len(Y_right)} a la derecha (desorden actual = {max_entropy_split})')
-    #             print(Y_left)
-    #             print(Y_right)
-    #             print(f'Entropia izquierda: {  Nodo.Entropy(Y_left)} {np.sum(Y_left)}')
-    #             print(f'Entropia derecha: {  Nodo.Entropy(Y_right)} {np.sum(Y_right)}')
+                print(f'Division con {elem} da {len(Y_left)} a la izquierda y {len(Y_right)} a la derecha (desorden actual = {max_entropy_split})')
+                print(Y_left)
+                print(Y_right)
+                print(f'Entropia izquierda: {  Nodo.Entropy(Y_left)} {np.sum(Y_left)}')
+                print(f'Entropia derecha: {  Nodo.Entropy(Y_right)} {np.sum(Y_right)}')
 
-    #             actual_disorder = Nodo.Entropy(Y) - (div_left * Nodo.Entropy(Y_left) +  div_right*Nodo.Entropy(Y_right))
-    #             print(f'Resultado para la entropia ({elem}): {actual_disorder}')
+                actual_disorder = Nodo.Entropy(Y) - (div_left * Nodo.Entropy(Y_left) +  div_right*Nodo.Entropy(Y_right))
+                print(f'Resultado para la entropia ({elem}): {actual_disorder}')
 
-    #             if actual_disorder > max_entropy_split:
-    #                 max_entropy_split = actual_disorder
-    #                 selected_split = elem 
-    #                 # selected_split = -1 if div_left == 1 or div_right == 1 else elem 
+                if actual_disorder > max_entropy_split:
+                    max_entropy_split = actual_disorder
+                    selected_split = elem 
+                    # selected_split = -1 if div_left == 1 or div_right == 1 else elem 
 
-    #         print(f'Elegido {selected_split} con {max_entropy_split} de ganacia')
-    #         if max_entropy_split > max_global:
-    #             print(f'Se cambia {max_global} de ({selected_dim},{split_for_dim}) por {max_entropy_split} de ({j},{selected_split})')
-    #             selected_dim = j
-    #             split_for_dim = selected_split
-    #             max_global = max_entropy_split
+            print(f'Elegido {selected_split} con {max_entropy_split} de ganacia')
+            if max_entropy_split > max_global:
+                print(f'Se cambia {max_global} de ({selected_dim},{split_for_dim}) por {max_entropy_split} de ({j},{selected_split})')
+                selected_dim = j
+                split_for_dim = selected_split
+                max_global = max_entropy_split
 
-    #     return selected_dim, split_for_dim
+        return selected_dim, split_for_dim
 
     
 

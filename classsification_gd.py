@@ -17,22 +17,15 @@ class ClassificationGD:
 
         return update_values(prediction)
     
+    def svm_raw_predict(self,x):
+        return self.h(x)
+    
     def svm_loss(self,x,y):
 
         return np.dot(self.w,self.w)/2 + self.c*np.sum(np.maximum(np.zeros(len(y)), 1 - y*self.h(x)))
     
     def svm_loss_derivates(self,x,y):
-        # dw = self.w
-        # db = 0
-        # pred_value = y*self.h(x)
-    
-        # if pred_value < 1:
-        #     dw = dw -  x*y*self.c
-        #     db = -y*self.c
-        # return dw,db
 
-
-        
         dw = self.w
         db = 0 
 
@@ -48,6 +41,17 @@ class ClassificationGD:
         
 
         return dw,db
+        # dw = self.w
+        # db = 0
+        # pred_value = y*self.h(x)
+    
+        # if pred_value < 1:
+        #     dw = dw -  x*y*self.c
+        #     db = -y*self.c
+        # return dw,db
+
+
+        
 
 
 
@@ -55,6 +59,12 @@ class ClassificationGD:
         return (1 + np.exp(-self.h(x)))**-1
     
     def logistic_predict(self,x):
+        # print(self.w)
+        # print(self.b)
+        # print(x)
+        # print(self.logistic_h(x))
+
+
         update_values = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
         prediction = self.logistic_h(x)
 
@@ -107,6 +117,8 @@ class ClassificationGD:
         self.loss_validate = []
         step = self.epochs//10 
         # print(x[:10,0])
+        print(L)
+
 
 
 
@@ -124,9 +136,11 @@ class ClassificationGD:
             self.update_parameters(der)
             L = self.Loss(x,y)
             self.loss.append(L)
+            # print(self.w)
+            # print(der)
 
-            # if _ % step == 0:
-            #     print(f'Epoch {_}, loss {L}')
+            if _ % step == 0:
+                print(f'Epoch {_}, loss {L}')
 
         # print(self.w,self.b)
     
@@ -145,7 +159,7 @@ class ClassificationGD:
         functions_dictionary = {'logistic': (self.logistic_predict,self.logistic_loss,self.logistic_loss_derivates),
                                 'svm': (self.svm_predict,self.svm_loss,self.svm_loss_derivates)}
 
-        self.Predict,self.Loss,self.Loss_derivate = functions_dictionary[model]
+        self.predict,self.Loss,self.Loss_derivate = functions_dictionary[model]
 
 
         self.model = model
@@ -175,33 +189,36 @@ def splitData(X,Y):
     return X_train,X_val,X_test,Y_train,Y_val,Y_test
 
 
-data = pd.read_csv('./tests_datasets/testing.csv')
+
+# print(ClassificationGD.svm_raw_predict())
+if __name__ == '__main__':
+    data = pd.read_csv('./tests_datasets/testing.csv')
 
 
 
-X0 = np.array(data['C1'])
-X1 = np.array(data['C2'])
+    X0 = np.array(data['C1'])
+    X1 = np.array(data['C2'])
 
-X = np.transpose(np.array([X0,X1]))
-Y = np.array(data['Clase'])
-model = 'svm'
-alpha = 0.15
+    X = np.transpose(np.array([X0,X1]))
+    Y = np.array(data['Clase'])
+    model = 'logistic'
+    alpha = 0.15
 
-if model == 'svm':
-    change_labels = np.vectorize(lambda x: -1 if x == 0 else 1 )
-    Y = change_labels(Y)
-    alpha = 0.0001
+    if model == 'svm':
+        change_labels = np.vectorize(lambda x: -1 if x == 0 else 1 )
+        Y = change_labels(Y)
+        alpha = 0.0001
 
-X_train,X_val,X_testing,Y_train,Y_val,Y_testing = splitData(X,Y)
+    X_train,X_val,X_testing,Y_train,Y_val,Y_testing = splitData(X,Y)
 
-logistic_regresion = ClassificationGD(alpha,1000,c=10,model=model)
-
-
+    logistic_regresion = ClassificationGD(alpha,1000,c=10,model=model)
 
 
-# logistic_regresion.train(X,Y,[],[])
-logistic_regresion.train(X_train,Y_train,X_val,Y_val)
-logistic_regresion.plot_losses()
-logistic_regresion.plot2d(X.T[0],X.T[1],Y)
-# print(Y.shape)
+
+
+    # logistic_regresion.train(X,Y,[],[])
+    logistic_regresion.train(X_train,Y_train,X_val,Y_val)
+    logistic_regresion.plot_losses()
+    logistic_regresion.plot2d(X.T[0],X.T[1],Y)
+    # print(Y.shape)
 
