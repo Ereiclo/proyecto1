@@ -173,11 +173,19 @@ class Nodo:
 class DT:
  # Defina cuales será sus mimbros datos
 
-    def __init__(self, X,Y):
+    def __init__(self):
         # Inicializar los mimbros datos
-        self.m_Root = Nodo(None)
+        self.m_Root = None
+   
 
+
+    def train(self,X,Y,*args):
+        self.m_Root = Nodo(None)
         self.buildDTForCurrentNode(self.m_Root,X,Y)
+ 
+
+
+    
 
     def buildDTForCurrentNode(self, actual_node,X,Y):
         # write your code here
