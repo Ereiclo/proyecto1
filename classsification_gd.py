@@ -28,18 +28,25 @@ class ClassificationGD:
     
     def svm_loss_derivates(self,x,y):
 
-        dw = self.w
-        db = 0 
+        
+
+        exists_der = (y*self.h(x) < 1).reshape(-1,1)
+        dw = self.w - np.sum((x*(y.reshape(-1,1))*self.c)*exists_der,axis=0)
+        db = - np.sum( self.c*y.reshape(-1,1)*exists_der,axis=0 )
+
+
+        # dw = self.w
+        # db = 0 
 
   
 
-        for point,class_ in zip(x,y):
-            # print(self.h(point))
-            pred = class_*self.h(point)
+        # for point,class_ in zip(x,y):
+        #     # print(self.h(point))
+        #     pred = class_*self.h(point)
 
-            if pred < 1:
-                dw = dw - point*self.c*class_ 
-                db = db - self.c*class_
+        #     if pred < 1:
+        #         dw = dw - point*self.c*class_ 
+        #         db = db - self.c*class_
         
 
         return dw,db
@@ -147,7 +154,7 @@ class ClassificationGD:
             # print(der)
 
             # if _ % step == 0:
-            #     print(f'Epoch {_}, loss {L} (size of training ({len(x[train_batch])}), size of testing ({len(y_val[val_batch])}))')
+                # print(f'Epoch {_}, loss {L} (size of training ({len(x[train_batch])}), size of testing ({len(y_val[val_batch])}))')
 
         # print(self.w,self.b)
     
