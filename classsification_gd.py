@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+# from sklearn.utils.random import sample_without_replacement
+from sklearn.utils import resample
 import matplotlib.pyplot as plt
 
 class ClassificationGD:
@@ -97,7 +99,7 @@ class ClassificationGD:
         plt.legend()
         plt.show()
 
-    def train(self,x,y,x_val,y_val):
+    def train(self,x,y,x_val,y_val,batch_size=30):
         np.random.seed(2001)
         self.w = np.array([np.random.rand() for i in range(len(x.T))])
         self.b = np.random.random()
@@ -117,14 +119,19 @@ class ClassificationGD:
         self.loss_validate = []
         step = self.epochs//10 
         # print(x[:10,0])
-        print(L)
+        # print(L)
 
 
 
 
 
         for _ in range(self.epochs):
-            self.loss_validate.append(self.Loss(x_val,y_val))
+
+            train_batch = resample(range(len(y)),n_samples=min(batch_size,len(y)),replace=False,random_state=42)
+            val_batch = resample(range(len(y_val)),n_samples=min(batch_size,len(y_val)),replace=False,random_state=42)
+
+
+            self.loss_validate.append(self.Loss(x_val[val_batch],y_val[val_batch]))
 
             # for idx, x_i in enumerate(x):
                 
@@ -132,15 +139,15 @@ class ClassificationGD:
                 # der = self.Loss_derivate(x_i,y[idx])
                 # self.update_parameters(der)
 
-            der = self.Loss_derivate(x,y)
+            der = self.Loss_derivate(x[train_batch],y[train_batch])
             self.update_parameters(der)
-            L = self.Loss(x,y)
+            L = self.Loss(x[train_batch],y[train_batch])
             self.loss.append(L)
             # print(self.w)
             # print(der)
 
-            if _ % step == 0:
-                print(f'Epoch {_}, loss {L}')
+            # if _ % step == 0:
+            #     print(f'Epoch {_}, loss {L} (size of training ({len(x[train_batch])}), size of testing ({len(y_val[val_batch])}))')
 
         # print(self.w,self.b)
     
