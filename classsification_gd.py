@@ -14,10 +14,14 @@ class ClassificationGD:
     
 
     def svm_predict(self,x):
-        update_values = np.vectorize(lambda x: -1 if x < 0 else 1,otypes=[float])
-        prediction = self.h(x)
+        # update_values = np.vectorize(lambda x: -1 if x < 0 else 1,otypes=[float])
+        # prediction = self.h(x)
 
-        return update_values(prediction)
+        eps = 0.0000000000000000001
+
+        # return update_values(prediction)
+        return np.sign(self.h(x) + eps)
+
     
     def svm_raw_predict(self,x):
         return self.h(x)
@@ -62,8 +66,6 @@ class ClassificationGD:
 
         
 
-
-
     def logistic_h(self,x):
         return (1 + np.exp(-self.h(x)))**-1
     
@@ -74,10 +76,12 @@ class ClassificationGD:
         # print(self.logistic_h(x))
 
 
-        update_values = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
-        prediction = self.logistic_h(x)
+        # update_values = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
+        # prediction = self.logistic_h(x)
 
-        return update_values(prediction)
+        # return update_values(prediction)
+        return self.logistic_h(x) >= 0.5
+    
     
 
     def logistic_loss(self,x,y):

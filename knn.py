@@ -10,11 +10,14 @@ from sklearn.neighbors import KDTree
  
 #KNN
 class KNN:
-    def __init__(self, k=3):
+    def __init__(self,clases, k=3,distance='euclidean'):
         self.k = k
+        self.clases = clases
+        self.distance = distance
+
 
     def train(self, X,Y, *args):
-        self.tree = KDTree(X)
+        self.tree = KDTree(X,metric=self.distance)
         self.labels = Y
 
     def predict(self, X):
@@ -28,6 +31,30 @@ class KNN:
         result =   [Counter(k_nearest_point_i).most_common()[0][0] for k_nearest_point_i in k_nearest_for_every_point]
 
         return result
+    
+    def probPredict(self,X):
+        _,indexes = self.tree.query(X,self.k)
+        #K mas cercano
+        # print(indexes)
+        k_nearest_for_every_point = self.labels[indexes] 
+        result = []
+
+        # print(k_nearest)
+        # print(X)
+
+        for k_nearest_point_i in k_nearest_for_every_point:
+            c = Counter(k_nearest_point_i)
+            probs = []
+            
+            for class_ in self.clases:
+                probs.append(c[class_]/c.total())
+
+            result.append(probs)
+
+        return np.array(result)
+
+
+
     
 
 if __name__ == '__main__':
