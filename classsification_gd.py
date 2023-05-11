@@ -105,6 +105,12 @@ class ClassificationGD:
         plt.plot([i for i in range(len(self.loss_validate))],self.loss_validate,label='validation')
         plt.legend()
         plt.show()
+    
+    def get_train_loss(self):
+        return ([i for i in range(len(self.loss))],self.loss)
+    
+    def get_val_loss(self):
+        return ([i for i in range(len(self.loss_validate))],self.loss_validate)
 
     def train(self,x,y,x_val,y_val,batch_size=30):
         np.random.seed(2001)

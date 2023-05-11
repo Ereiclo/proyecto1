@@ -5,35 +5,29 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+from sklearn.neighbors import KDTree
  
-#Distancia Euclideana
-def eucledianDist(p1,p2):
-    dist = np.sqrt(np.sum((p1-p2)**2))
-    return dist
  
 #KNN
 class KNN:
     def __init__(self, k=3):
         self.k = k
 
-    def train(self, X, y,*args):
-        self.X_train = X
-        self.y_train = y
+    def train(self, X,Y, *args):
+        self.tree = KDTree(X)
+        self.labels = Y
 
     def predict(self, X):
-        predictions = [self._predict(x) for x in X]
-        return predictions
-
-    def _predict(self, x):
-        #Haya las distancias
-        distances = [eucledianDist(x, x_train) for x_train in self.X_train]
-    
+        _,indexes = self.tree.query(X,self.k)
         #K mas cercano
-        k_indices = np.argsort(distances)[:self.k]
-        k_nearest_labels = [self.y_train[i] for i in k_indices]
+        # print(indexes)
+        k_nearest_for_every_point = self.labels[indexes] 
 
-        most_common = Counter(k_nearest_labels).most_common()
-        return most_common[0][0]
+        # print(k_nearest)
+        # print(X)
+        result =   [Counter(k_nearest_point_i).most_common()[0][0] for k_nearest_point_i in k_nearest_for_every_point]
+
+        return result
     
 
 if __name__ == '__main__':
