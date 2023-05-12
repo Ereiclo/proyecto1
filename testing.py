@@ -355,7 +355,7 @@ def boostrap(X,Y,k,model):
 
 def test_hyperparameters_logistic(X,Y,k=10):
     # v = [(0.08,1600),(0.10,1400),(0.15,1000),(0.18,600)]
-    v = [(0.15,1600),(0.18,600),(0.5,1600),(0.75,1600),(1,1600),(3,1600),(5,1600)]
+    v = [(0.15,1600),(0.18,600),(0.5,1600),(0.75,1600),(1,1600),(3,1600),(5,1600),(8,1600),(10,1600)]
     clases_list = sorted(list({elem for elem in data[data.columns[-1]]}))
     clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
     scores = 'alpha,epochs,accuracy,precision,recall,f1,auc\n'
@@ -379,8 +379,8 @@ def test_hyperparameters_logistic(X,Y,k=10):
 
             
 def test_hyperparameters_svm(X,Y,k=10):
-    v = [(0.00001,1600),(0.0001,1000),(0.001,800)]
-    c = [0.1,1,10,100]
+    v = [(0.0000001,1600),(0.000001,1600),(0.00001,1600),(0.0001,1600),(0.001,1600)]
+    c = [0.1,1,10,100,1000]
     clases_list = sorted(list({elem for elem in data[data.columns[-1]]}))
     clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
     scores = 'c,accuracy,precision,recall,f1,auc\n'
@@ -479,9 +479,9 @@ clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
 # boostrap(X,Y,15,multi_logistic(0.15,1000,batch_size=len(Y)))
 # boostrap(X,Y,15,multi_svm(0.0001,1000,batch_size=len(Y)))
 
-# test_hyperparameters_logistic(X,Y,10)
-# test_hyperparameters_svm(X,Y,10)
-test_hyperparameters_knn(X,Y,10)
+test_hyperparameters_svm(X,Y,10)
+test_hyperparameters_logistic(X,Y,10)
+# test_hyperparameters_knn(X,Y,10)
 
 
 
