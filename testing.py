@@ -479,9 +479,9 @@ clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
 # boostrap(X,Y,15,multi_logistic(0.15,1000,batch_size=len(Y)))
 # boostrap(X,Y,15,multi_svm(0.0001,1000,batch_size=len(Y)))
 
-test_hyperparameters_logistic(X,Y,10)
+# test_hyperparameters_logistic(X,Y,10)
 # test_hyperparameters_svm(X,Y,10)
-# test_hyperparameters_knn(X,Y,10)
+test_hyperparameters_knn(X,Y,10)
 
 
 
