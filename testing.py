@@ -81,6 +81,10 @@ class multi_svm:
         return np.array(predictions) 
     def probPredict(self,X):
         return []
+    
+
+    def getLosses(self):
+        return [model.getLosses() for model in self.models]
 
 class multi_logistic:
     def __init__(self,alpha,epochs,batch_size=30):
@@ -139,6 +143,10 @@ class multi_logistic:
         
         return np.array(prob_predictions) 
     
+    def getLosses(self):
+
+        return [model.getLosses() for model in self.models]
+
     def plot_train_loss(self):
         colors = ['red','green','orange']
 
@@ -149,13 +157,14 @@ class multi_logistic:
             
     
 
-def k_folds(X,Y,k,model):
+def k_folds(X,Y,k,model,path=''):
 
     clases = sorted(list({elem for elem in Y}))
     clases_map = {clases[i]:i for i in range(len(clases))}
         
     n_in_fold = len(Y)//k
 
+    losses = []
     accuracy_ = []
     precision_ = []
     recall_ = []
@@ -191,6 +200,9 @@ def k_folds(X,Y,k,model):
 
         print(f'Para el fold {i} se demoro {training_time} para entrenar')
 
+        if hasattr(model,'getLosses'):
+            losses.append(model.getLosses())
+
         pred = model.predict(X_test)
         prob = model.probPredict(X_test)
 
@@ -199,6 +211,7 @@ def k_folds(X,Y,k,model):
         one_hot_real_data = to_multi_label(Y_test,clases_map)
 
 
+        print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
         # print(confusion_matrix(Y_train,pred))
         partial_precision = precision_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_recall = recall_score(one_hot_real_data,one_hot_data_pred,average=None)
@@ -209,7 +222,7 @@ def k_folds(X,Y,k,model):
         # model.plot_train_loss()
 
 
-        # print(partial_accuracy,partial_precision,partial_recall,partial_f1,partial_auc_score)
+        print(partial_accuracy,partial_precision,partial_recall,partial_f1,partial_auc_score)
 
         precision_.append(partial_precision)
         recall_.append(partial_recall)
@@ -227,25 +240,67 @@ def k_folds(X,Y,k,model):
     print(f'Tiempo total: {total_time}')
     # print(precision_,recall_,f1_score_,auc_score_)
 
-    # print('La accuracy es ',accuracy_)
-    # print('La precision es:',precision_)
-    # print('El recall es:',precision_)
-    # print('El f1 score es ',f1_score_)
-    # print('El auc es ',auc_score_)
+    print('La accuracy es ',accuracy_)
+    print('La precision es:',precision_)
+    print('El recall es:',precision_)
+    print('El f1 score es ',f1_score_)
+    print('El auc es ',auc_score_)
 
+    if len(losses)>= 1:
+        # colors = ['red','green','orange']
+
+        indexes = [i for i in range(model.epochs+1)]
+        for i in range(len(clases)):
+
+            type_ = [f'Train losses para k_folds clase {clases[i]}',f'Validation losses para k_folds clase {clases[i]}']
+            name_ = ['train','loss']
+            for j in range(2):
+                for total_losses in losses:
+        
+                    plt.plot(indexes,total_losses[i][j])
+
+                plt.title(type_[j])
+                # plt.show()
+                plt.savefig(path+ f'k_folds_{clases[i]}_{name_[j]}.png',format='png')
+                plt.clf()
+        
+        train_average_losses = [np.zeros(model.epochs+1) for _ in range(len(clases)) ]
+        val_average_losses = [np.zeros(model.epochs+1) for _ in range(len(clases)) ]
+
+        for i in range(len(clases)):
+            for total_loses in losses:
+                train_average_losses[i] =  train_average_losses[i] + np.array(total_loses[i][0])
+                val_average_losses[i] =  val_average_losses[i] + np.array(total_loses[i][1])
+
+            train_average_losses[i] = train_average_losses[i]/k
+            val_average_losses[i] = train_average_losses[i]/k
+
+            # print(train_average_losses[i].shape)
+            # print(val_average_losses[i].shape)
+
+            plt.title(f'Loss promedio para k_folds clase {clases[i]}')
+            plt.plot(indexes,train_average_losses[i],label='train loss')
+            plt.plot(indexes,val_average_losses[i],label='val loss')
+            plt.legend()
+        
+            plt.savefig(path + f'k_folds_{clases[i]}_average.png',format='png')
+            plt.clf()
 
     return [accuracy_,precision_,recall_,f1_score_,auc_score_]
 
 
+
+
         
 
 
-def boostrap(X,Y,k,model):
+def boostrap(X,Y,k,model,path=''):
 
     clases = sorted(list({elem for elem in Y}))
     clases_map = {clases[i]:i for i in range(len(clases))}
         
-    n_in_fold = len(Y)//k
+
+    losses = []
 
     accuracy_ = []
     precision_ = []
@@ -291,9 +346,6 @@ def boostrap(X,Y,k,model):
 
 
 
-
-        
-
         # print(Y_train.shape)
         # print(Y_test.shape)
 
@@ -308,6 +360,9 @@ def boostrap(X,Y,k,model):
 
         print(f'Para el boostrap {i} se demoro {training_time} para entrenar')
 
+        if path != '' and hasattr(model,'getLosses'):
+            losses.append(model.getLosses())
+
         pred = model.predict(X_test)
         prob = model.probPredict(X_test)
         one_hot_data_pred = to_multi_label(pred,clases_map)
@@ -315,7 +370,7 @@ def boostrap(X,Y,k,model):
         one_hot_real_data = to_multi_label(Y_test,clases_map)
 
 
-        # print(confusion_matrix(Y_train,pred))
+        print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
         partial_precision = precision_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_recall = recall_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_f1 = f1_score(one_hot_real_data,one_hot_data_pred,average=None)
@@ -325,7 +380,7 @@ def boostrap(X,Y,k,model):
         # model.plot_train_loss()
 
 
-        # print(partial_precision,partial_recall,partial_f1,partial_auc_score)
+        print(partial_accuracy,partial_precision,partial_recall,partial_f1,partial_auc_score)
 
         precision_.append(partial_precision)
         recall_.append(partial_recall)
@@ -344,11 +399,52 @@ def boostrap(X,Y,k,model):
 
     print(f'Tiempo total: {total_time}')
     # print(precision_,recall_,f1_score_,auc_score_)
-    # print('La accuracy es ',accuracy_)
-    # print('La precision es:',precision_)
-    # print('El recall es:',precision_)
-    # print('El f1 score es ',f1_score_)
-    # print('El auc es ',auc_score_)
+    print('La accuracy es ',accuracy_)
+    print('La precision es:',precision_)
+    print('El recall es:',precision_)
+    print('El f1 score es ',f1_score_)
+    print('El auc es ',auc_score_)
+
+
+    if path != '' and len(losses)>= 1:
+        # colors = ['red','green','orange']
+
+        indexes = [i for i in range(model.epochs+1)]
+        for i in range(len(clases)):
+
+            type_ = [f'Train losses para boostrap clase {clases[i]}',f'Validation losses para boostrap clase {clases[i]}']
+            name_ = ['train','loss']
+            for j in range(2):
+                for total_losses in losses:
+        
+                    plt.plot(indexes,total_losses[i][j])
+
+                plt.title(type_[j])
+                # plt.show()
+                plt.savefig(path+ f'boostrap_{clases[i]}_{name_[j]}.png',format='png')
+                plt.clf()
+        
+        train_average_losses = [np.zeros(model.epochs+1) for _ in range(len(clases)) ]
+        val_average_losses = [np.zeros(model.epochs+1) for _ in range(len(clases)) ]
+
+        for i in range(len(clases)):
+            for total_loses in losses:
+                train_average_losses[i] =  train_average_losses[i] + np.array(total_loses[i][0])
+                val_average_losses[i] =  val_average_losses[i] + np.array(total_loses[i][1])
+
+            train_average_losses[i] = train_average_losses[i]/k
+            val_average_losses[i] = train_average_losses[i]/k
+
+            # print(train_average_losses[i].shape)
+            # print(val_average_losses[i].shape)
+
+            plt.title(f'Loss promedio para boostrap clase {clases[i]}')
+            plt.plot(indexes,train_average_losses[i],label='train loss')
+            plt.plot(indexes,val_average_losses[i],label='val loss')
+            plt.legend()
+        
+            plt.savefig(path + f'boostrap_{clases[i]}_average.png',format='png')
+            plt.clf()
 
     return [accuracy_,precision_,recall_,f1_score_,auc_score_]
 
@@ -433,6 +529,30 @@ def test_hyperparameters_knn(X,Y,k=10):
             file.close()
 
             
+def test_hyperparameters_dt(X,Y,k=10):
+
+    clases_list = sorted(list({elem for elem in data[data.columns[-1]]}))
+    clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
+    scores = 'accuracy,precision,recall,f1,auc\n'
+
+    for method,name in [(k_folds,'k_folds'),(boostrap,'boostrap')]:
+
+        file = open('./hyperparameters_experiments/dt/' + name +  '.csv','w')
+
+        file.write(scores)
+
+
+        results =  method(X,Y,k,DT(clases_dict))
+
+        for i in range(len(results)):
+            if i < len(results) - 1:
+                file.write(str(results[i]) + ',')
+            else:
+                file.write(str(results[i]) + '\n')
+        file.close()
+
+ 
+
 
 scaler = MinMaxScaler()
 
@@ -466,22 +586,37 @@ Y_test = data_test['CLASE'].to_numpy()
 
 clases_list = sorted(list({elem for elem in data[data.columns[-1]]}))
 clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
-# k_folds(X,Y,10,DT(clases_dict))
-# k_folds(X,Y,10,KNN(clases_dict))
-# k_folds(X,Y,10,multi_logistic(1,1000,batch_size=len(Y)))
 
 
-# k_folds(X,Y,10,multi_svm(0.0001,1000,batch_size=len(Y)))
-
-
-# boostrap(X,Y,15,DT(clases_dict))
-# boostrap(X,Y,15,KNN(clases_dict))
-# boostrap(X,Y,15,multi_logistic(0.15,1000,batch_size=len(Y)))
-# boostrap(X,Y,15,multi_svm(0.0001,1000,batch_size=len(Y)))
-
-test_hyperparameters_svm(X,Y,10)
-test_hyperparameters_logistic(X,Y,10)
+# test_hyperparameters_svm(X,Y,10)
+# test_hyperparameters_logistic(X,Y,10)
 # test_hyperparameters_knn(X,Y,10)
+# test_hyperparameters_dt(X,Y,10)
+
+print('Mejores resultados: ')
+
+#print('MULTI LOGISTIC')
+# boostrap(X,Y,10,multi_logistic(8,1600,batch_size=len(Y)),path='./graphs/logistic/')
+# k_folds(X,Y,10,multi_logistic(5,1600,batch_size=len(Y)),path='./graphs/logistic/')
+
+#print('MULTI SVM')
+# boostrap(X,Y,10,multi_svm(1e-5,1600,c=100,batch_size=len(Y)),path='./graphs/svm/')
+# k_folds(X,Y,10,multi_svm(0.0001,1600,c=10,batch_size=len(Y)),path='./graphs/svm/')
+
+print('DECISION TREE')
+
+boostrap(X,Y,10,DT(clases_dict))
+k_folds(X,Y,10,DT(clases_dict))
+
+
+print('KNN')
+boostrap(X,Y,10,KNN(clases_dict,distance='l1'))
+k_folds(X,Y,10,KNN(clases_dict,distance='l1'))
+
+
+
+
+
 
 
 

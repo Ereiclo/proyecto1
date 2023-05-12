@@ -166,6 +166,8 @@ class ClassificationGD:
             # if _ % step == 0:
                 # print(f'Epoch {_}, loss {L} (size of training ({len(x[train_batch])}), size of testing ({len(y_val[val_batch])}))')
 
+
+        self.loss_validate.append(self.Loss(x_val[val_batch],y_val[val_batch]))
         # print(self.w,self.b)
     
     def plot2d(self,x1,x2,y):
@@ -195,6 +197,8 @@ class ClassificationGD:
         self.loss = []
         self.loss_validate = []
     
+    def getLosses(self):
+        return self.loss,self.loss_validate
 
 
 
