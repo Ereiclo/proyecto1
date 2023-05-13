@@ -200,7 +200,7 @@ def k_folds(X,Y,k,model,path=''):
 
         print(f'Para el fold {i} se demoro {training_time} para entrenar')
 
-        if hasattr(model,'getLosses'):
+        if path != '' and hasattr(model,'getLosses'):
             losses.append(model.getLosses())
 
         pred = model.predict(X_test)
@@ -211,8 +211,8 @@ def k_folds(X,Y,k,model,path=''):
         one_hot_real_data = to_multi_label(Y_test,clases_map)
 
 
-        print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
-        # print(confusion_matrix(Y_train,pred))
+        # print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
+        print(confusion_matrix(Y_test,pred))
         partial_precision = precision_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_recall = recall_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_f1 = f1_score(one_hot_real_data,one_hot_data_pred,average=None)
@@ -246,7 +246,7 @@ def k_folds(X,Y,k,model,path=''):
     print('El f1 score es ',f1_score_)
     print('El auc es ',auc_score_)
 
-    if len(losses)>= 1:
+    if path != '' and len(losses)>= 1:
         # colors = ['red','green','orange']
 
         indexes = [i for i in range(model.epochs+1)]
@@ -370,7 +370,9 @@ def boostrap(X,Y,k,model,path=''):
         one_hot_real_data = to_multi_label(Y_test,clases_map)
 
 
-        print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
+
+        # print(confusion_matrix(Y_test,pred)/np.sum(confusion_matrix(Y_test,pred),axis=1)*100)
+        print(confusion_matrix(Y_test,pred))
         partial_precision = precision_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_recall = recall_score(one_hot_real_data,one_hot_data_pred,average=None)
         partial_f1 = f1_score(one_hot_real_data,one_hot_data_pred,average=None)
@@ -595,13 +597,13 @@ clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
 
 print('Mejores resultados: ')
 
-#print('MULTI LOGISTIC')
-# boostrap(X,Y,10,multi_logistic(8,1600,batch_size=len(Y)),path='./graphs/logistic/')
-# k_folds(X,Y,10,multi_logistic(5,1600,batch_size=len(Y)),path='./graphs/logistic/')
+print('MULTI LOGISTIC')
+boostrap(X,Y,10,multi_logistic(8,1600,batch_size=len(Y)))
+k_folds(X,Y,10,multi_logistic(5,1600,batch_size=len(Y)))
 
-#print('MULTI SVM')
-# boostrap(X,Y,10,multi_svm(1e-5,1600,c=100,batch_size=len(Y)),path='./graphs/svm/')
-# k_folds(X,Y,10,multi_svm(0.0001,1600,c=10,batch_size=len(Y)),path='./graphs/svm/')
+print('MULTI SVM')
+boostrap(X,Y,10,multi_svm(1e-5,1600,c=100,batch_size=len(Y)))
+k_folds(X,Y,10,multi_svm(0.0001,1600,c=10,batch_size=len(Y)))
 
 print('DECISION TREE')
 
