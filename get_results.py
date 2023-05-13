@@ -35,8 +35,11 @@ clases_dict = {clases_list[i]: i for i in range(len(clases_list))}
 dt = DT(clases_dict)
 dt.train(X,Y)
 
+pred = dt.predict(X_test)
+for i in range(len(pred)):
+    print(i, pred[i])
 
-# print(Counter(dt.predict(X_test)))
+# print(Counter())
 
 
 
